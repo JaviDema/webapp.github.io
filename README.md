@@ -1,6 +1,9 @@
 # EduAI Companion 🤖
 ## 📚 Descripción
 EduAI Companion es un chatbot educativo inteligente que personaliza la experiencia de aprendizaje según el perfil del usuario. Utiliza modelos avanzados de IA y análisis adaptativo para ofrecer una experiencia educativa única.
+
+-> [Aplicación implementada](https://x0dev-chatEduAI.replit.app)
+
 ## 🚀 Características Principales
 ### Sistema de Autenticación JWT
 - Login seguro basado en tokens
