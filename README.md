@@ -32,41 +32,38 @@ pip install -r requirements.txt
 cp .env.example .env
 # Iniciar aplicación
 python app.py
-📦 Requisitos
-Python >= 3.11
-Flask >= 3.0.3
-SQLAlchemy >= 3.1.1
-OpenAI >= 1.52.0
-MistralAI == 0.4.2
-🚀 Uso
-Registro/Login con token
-Completar cuestionario de perfil
-Acceder al chatbot personalizado
-Interactuar y recibir contenido adaptado
-👥 Contribución
-Fork del proyecto
-Crear rama (git checkout -b feature/nueva-caracteristica)
-Commit (git commit -m 'Añadir característica')
-Push (git push origin feature/nueva-caracteristica)
-Pull Request
-📄 Licencia
+```
+## 📦 Requisitos
+- Python >= 3.11
+- Flask >= 3.0.3
+- SQLAlchemy >= 3.1.1
+- OpenAI >= 1.52.0
+- MistralAI == 0.4.2
+
+## 🚀 Uso
+1. Registro/Login con token
+2. Completar cuestionario de perfil
+3. Acceder al chatbot personalizado
+4. Interactuar y recibir contenido adaptado
+
+## 👥 Contribución
+1. Fork del proyecto
+2. Crear rama: `git checkout -b feature/nueva-caracteristica`
+3. Commit: `git commit -m 'Añadir característica'`
+4. Push: `git push origin feature/nueva-caracteristica`
+5. Pull Request
+
+## 📄 Licencia
 Este proyecto está bajo la Licencia MIT.
 
-🤝 Soporte
-Para soporte, contactar: x0dev.ai@gmail.com
+## 🤝 Soporte
+Para soporte, contactar: [x0dev.ai@gmail.com](mailto:x0dev.ai@gmail.com)
 
-🌟 Roadmap
-Integración con más APIs educativas
-Soporte multilenguaje
-Análisis predictivo avanzado
-Sistema de gamificación
+## 🌟 Roadmap
+- Integración con más APIs educativas
+- Soporte multilenguaje
+- Análisis predictivo avanzado
+- Sistema de gamificación
+---
+
 Desarrollado con ❤️ por X0DEV
-
-Los cambios principales incluyen:
-- Mejor espaciado y jerarquía visual
-- Secciones más claramente definidas
-- Uso consistente de emojis
-- Bloques de código mejor formateados
-- Lista numerada para pasos secuenciales
-- Línea divisoria al final
-- Formato mejorado para los requisitos y características
