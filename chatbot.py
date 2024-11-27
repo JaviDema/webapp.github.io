@@ -4,7 +4,6 @@ from flask import Blueprint, request, jsonify
 from models import User, ChatHistory, db
 from auth import token_required
 from mistralai.client import MistralClient
-from mistralai.models.chat_completion import ChatMessage
 from datetime import datetime
 import json
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -47,9 +46,9 @@ def extract_topics(text):
         tokens = word_tokenize(text.lower())
         stop_words = set(stopwords.words('spanish') + stopwords.words('english'))
         tagged = nltk.pos_tag(tokens)
-        topics = [word for word, tag in tagged 
-                if word not in stop_words 
-                and len(word) > 3 
+        topics = [word for word, tag in tagged
+                if word not in stop_words
+                and len(word) > 3
                 and tag in ['NN', 'NNS', 'NNP', 'NNPS']]
         return list(set(topics))
     except Exception as e:
@@ -62,22 +61,22 @@ def find_similar_questions(current_question, user_id, limit=5):
         user_id=user_id,
         helpful=True
     ).order_by(ChatHistory.timestamp.desc()).all()
-    
+
     if not history:
         return []
-    
+
     previous_questions = [chat.message for chat in history]
-    
+
     if not previous_questions:
         return []
-    
+
     try:
         vectorizer = TfidfVectorizer(stop_words='english')
         all_questions = [current_question] + previous_questions
         tfidf_matrix = vectorizer.fit_transform(all_questions)
-        
+
         similarities = cosine_similarity(tfidf_matrix[0:1], tfidf_matrix[1:])[0]
-        
+
         similar_interactions = []
         for idx in (-similarities).argsort()[:limit]:
             if similarities[idx] > 0.3:  # Similarity threshold
@@ -87,7 +86,7 @@ def find_similar_questions(current_question, user_id, limit=5):
                     'similarity': similarities[idx],
                     'understanding': history[idx].user_understanding
                 })
-        
+
         return similar_interactions
     except Exception as e:
         print(f"Error finding similar questions: {e}")
@@ -98,7 +97,7 @@ def analyze_user_progress(user_id):
     recent_chats = ChatHistory.query.filter_by(user_id=user_id)\
         .order_by(ChatHistory.timestamp.desc())\
         .limit(20).all()
-    
+
     if not recent_chats:
         return {
             'avg_complexity': 1,
@@ -112,7 +111,7 @@ def analyze_user_progress(user_id):
     # Calculate basic metrics
     avg_complexity = sum(chat.complexity_level or 1 for chat in recent_chats) / len(recent_chats)
     avg_understanding = sum(chat.user_understanding or 3 for chat in recent_chats) / len(recent_chats)
-    
+
     # Calculate topic mastery scores
     topic_interactions = {}
     for chat in recent_chats:
@@ -123,7 +122,7 @@ def analyze_user_progress(user_id):
             'helpful': chat.helpful,
             'timestamp': chat.timestamp
         })
-    
+
     mastery_scores = {}
     for topic, interactions in topic_interactions.items():
         # Weight recent interactions more heavily
@@ -139,7 +138,7 @@ def analyze_user_progress(user_id):
     # Analyze learning pace
     timestamps = [chat.timestamp for chat in recent_chats]
     if len(timestamps) > 1:
-        time_diffs = [(t2 - t1).total_seconds() / 3600 
+        time_diffs = [(t2 - t1).total_seconds() / 3600
                      for t1, t2 in zip(timestamps[1:], timestamps[:-1])]
         avg_time_between = np.mean(time_diffs)
         learning_pace = (
@@ -168,10 +167,10 @@ def analyze_user_progress(user_id):
     for chat in recent_chats:
         if chat.helpful:
             topics.extend(extract_topics(chat.message))
-    
-    preferred_topics = [topic for topic, count 
-                       in sorted([(t, topics.count(t)) for t in set(topics)], 
-                               key=lambda x: x[1], 
+
+    preferred_topics = [topic for topic, count
+                       in sorted([(t, topics.count(t)) for t in set(topics)],
+                               key=lambda x: x[1],
                                reverse=True)[:5]]
 
     return {
@@ -204,19 +203,19 @@ def get_tailored_prompt(user_type, message, user_progress, similar_interactions)
     base_system_prompt = '''
     Eres un tutor de IA especializado en educación. Debes responder en español y adaptar tu estilo según el tipo de estudiante.
     '''
-    
+
     # Add mastery information
     mastery_info = "\nNiveles de dominio por tema:\n"
     for topic, score in user_progress['mastery_scores'].items():
         mastery_info += f"- {topic}: {score:.2f}/1.0\n"
-    
+
     # Add context from similar interactions
     context = "\nContexto de interacciones anteriores relevantes:\n"
     for idx, interaction in enumerate(similar_interactions, 1):
         context += f"{idx}. Pregunta similar: {interaction['question']}\n"
         context += f"   Respuesta exitosa: {interaction['response']}\n"
         context += f"   Nivel de comprensión: {interaction.get('understanding', 3)}/5\n"
-    
+
     analytics = f"""
     Análisis del progreso del estudiante:
     - Nivel de complejidad actual: {user_progress['avg_complexity']}/5
@@ -225,7 +224,7 @@ def get_tailored_prompt(user_type, message, user_progress, similar_interactions)
     - Temas preferidos: {', '.join(user_progress['preferred_topics'])}
     {mastery_info}
     """
-    
+
     if user_type == 'ESTRUCTURADO':
         system_prompt = base_system_prompt + f'''
         Para estudiantes estructurados:
@@ -256,10 +255,10 @@ def get_tailored_prompt(user_type, message, user_progress, similar_interactions)
         {analytics}
         {context}
         '''
-    
+
     return [
-        ChatMessage(role="system", content=system_prompt),
-        ChatMessage(role="user", content=f"Responde a la siguiente consulta: {message}")
+        {"role": "system", "content": system_prompt},
+        {"role": "user", "content": f"Responde a la siguiente consulta: {message}"}
     ]
 
 @chatbot_bp.route('/chat', methods=['POST'])
@@ -268,25 +267,25 @@ def chat(current_user):
     start_time = time.time()
     message = request.form.get('message', '')
     file = request.files.get('file')
-    
+
     if not message and not file:
         return jsonify({'error': 'No se proporcionó ningún mensaje o archivo'}), 400
-        
+
     # Handle file if present
     file_info = ""
     if file and file.filename:
         filename = secure_filename(file.filename)
         file_info = f"\nArchivo adjunto: {filename}"
-        
+
     # Preprocess the input message
     processed_message = preprocess_text(message + file_info if file_info else message)
-    
+
     # Get user progress and analytics
     user_progress = analyze_user_progress(current_user.id)
-    
+
     # Find similar previous interactions
     similar_interactions = find_similar_questions(processed_message, current_user.id)
-    
+
     # Get user type and create tailored messages
     user_type = current_user.user_type
     messages = get_tailored_prompt(user_type, processed_message, user_progress, similar_interactions)
@@ -303,13 +302,13 @@ def chat(current_user):
         # Extract topics from the conversation
         topics = extract_topics(processed_message)
         main_topic = topics[0] if topics else "general"
-        
+
         # Update user interaction count
         current_user.interaction_count += 1
-        
+
         # Calculate response time
         response_time = time.time() - start_time
-        
+
         # Save the chat history with enhanced tracking
         chat_entry = ChatHistory(
             user_id=current_user.id,
@@ -338,32 +337,32 @@ def submit_feedback(current_user):
     chat_id = data.get('chat_id')
     helpful = data.get('helpful')
     understanding = data.get('understanding')
-    
+
     if not chat_id:
         return jsonify({'error': 'Chat ID is required'}), 400
-        
+
     try:
         chat = ChatHistory.query.filter_by(
-            id=chat_id, 
+            id=chat_id,
             user_id=current_user.id
         ).first()
-        
+
         if not chat:
             return jsonify({'error': 'Chat not found'}), 404
-            
+
         chat.helpful = helpful if helpful is not None else chat.helpful
         if understanding:
             chat.user_understanding = understanding
-            
+
         # Calculate interaction quality
         if helpful is not None and understanding:
             chat.interaction_quality = (helpful + (understanding / 5)) / 2
-            
+
         # Update session duration
         if chat.timestamp:
             session_duration = (datetime.utcnow() - chat.timestamp).total_seconds()
             chat.session_duration = int(session_duration)
-            
+
         db.session.commit()
         return jsonify({'message': 'Feedback submitted successfully'}), 200
     except Exception as e:
