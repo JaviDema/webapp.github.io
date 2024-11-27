@@ -39,8 +39,8 @@ cd EduAI-Companion
 python -m venv venv
 source venv/bin/activate  # En Windows: venv\Scripts\activate
 
-# 3. Instalar dependencias principales
-pip install flask flask-sqlalchemy PyJWT mistralai==0.4.2 nltk scikit-learn
+# 3. Instalar todas las dependencias desde requirements.txt
+pip install -r requirements.txt
 
 # 4. Configurar variables de entorno
 export FLASK_SECRET_KEY="tu_clave_secreta"  # En Windows: set FLASK_SECRET_KEY=tu_clave_secreta
@@ -54,11 +54,18 @@ La aplicación estará disponible en `http://localhost:5000`
 
 ## 📦 Requisitos del Sistema
 - Python >= 3.11
-- Flask >= 3.0.3
-- SQLAlchemy >= 3.1.1
-- MistralAI == 0.4.2 (versión específica requerida)
-- NLTK (con datos adicionales: punkt, stopwords, averaged_perceptron_tagger)
-- Scikit-learn para análisis de similitud
+- Todas las dependencias listadas en `requirements.txt`:
+  ```
+  flask>=3.0.3
+  flask-sqlalchemy>=3.1.1
+  PyJWT>=2.8.0
+  mistralai==0.4.2
+  nltk>=3.9.1
+  scikit-learn>=1.5.2
+  Werkzeug>=3.0.1
+  python-dateutil>=2.8.2
+  numpy>=1.24.0
+  ```
 
 ## 🗂️ Estructura del Proyecto
 ```
@@ -72,6 +79,7 @@ EduAI-Companion/
 ├── auth.py           # Sistema de autenticación
 ├── chatbot.py        # Lógica del chatbot
 ├── models.py         # Modelos de la base de datos
+├── requirements.txt  # Lista de dependencias
 └── questionnaire.py  # Lógica del cuestionario
 ```
 
@@ -113,6 +121,13 @@ EduAI-Companion/
 3. **Error con MistralAI:**
    - Verifica que tienes la versión correcta (0.4.2)
    - Asegúrate de tener una API key válida
+
+4. **Problemas con las dependencias:**
+   - Si encuentras conflictos, intenta instalar las dependencias una por una:
+     ```bash
+     pip install -r requirements.txt --no-deps
+     pip install <paquete_específico>
+     ```
 
 ## 👥 Contribución
 1. Fork del proyecto
